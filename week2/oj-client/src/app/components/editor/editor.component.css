@@ -2,22 +2,23 @@
  #editor {
    height: 600px;
  }
-   .lang-select {
+ .lang-select {
    width: 100px;
    margin-right: 10px;
  }
-   header .btn {
+ header .btn {
    margin: 0 5px;
  }
-   footer .btn {
+ footer .btn {
    margin: 0 5px;
  }
-   .editor-footer, .editor-header {
+ .editor-footer, .editor-header {
    margin: 10px 0;
  }
-   .cursor {
+ .cursor {
    /*position:absolute;*/
    background: rgba(0, 250, 0, 0.5);
    z-index: 40;
    width: 2px!important
-} }
+ } 
+}

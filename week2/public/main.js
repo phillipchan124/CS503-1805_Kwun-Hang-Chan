@@ -193,7 +193,7 @@ var routing = _angular_router__WEBPACK_IMPORTED_MODULE_0__["RouterModule"].forRo
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "@media screen {\n #editor {\n   height: 600px;\n }\n   .lang-select {\n   width: 100px;\n   margin-right: 10px;\n }\n   header .btn {\n   margin: 0 5px;\n }\n   footer .btn {\n   margin: 0 5px;\n }\n   .editor-footer, .editor-header {\n   margin: 10px 0;\n }\n   .cursor {\n   /*position:absolute;*/\n   background: rgba(0, 250, 0, 0.5);\n   z-index: 40;\n   width: 2px!important\n} }"
+module.exports = "@media screen {\n #editor {\n   height: 600px;\n }\n .lang-select {\n   width: 100px;\n   margin-right: 10px;\n }\n header .btn {\n   margin: 0 5px;\n }\n footer .btn {\n   margin: 0 5px;\n }\n .editor-footer, .editor-header {\n   margin: 10px 0;\n }\n .cursor {\n   /*position:absolute;*/\n   background: rgba(0, 250, 0, 0.5);\n   z-index: 40;\n   width: 2px!important\n } \n}"
 
 /***/ }),
 
@@ -204,7 +204,7 @@ module.exports = "@media screen {\n #editor {\n   height: 600px;\n }\n   .lang-s
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<p>\n  editor works!\n</p>\n"
+module.exports = "<section>\n  <header class=\"editor-header\">\n    <div class=\"row\">\n      <select class=\"form-control pull-left lang-select\" name=\"language\"\n        [(ngModel)]=\"language\" (change)=\"setLanguage(language)\">\n      <option *ngFor=\"let language of languages\" [value]=\"language\">\n        {{language}}\n      </option>\n      </select>\n      <!--reset button -->\n      <!-- Button trigger modal -->\n      <button type=\"button\" class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#myModal\">\n        Reset\n      </button>\n\n      <!-- Modal -->\n      <div class=\"modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">\n        <div class=\"modal-dialog\" role=\"document\">\n          <div class=\"modal-content\">\n            <div class=\"modal-header\">\n              <h5 class=\"modal-title\" id=\"exampleModalLabel\">Are you sure</h5>\n              <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">\n                <span aria-hidden=\"true\">&times;</span>\n              </button>\n            </div>\n            <div class=\"modal-body\">\n              You will lose current code in the editor, are you sure?\n            </div>\n            <div class=\"modal-footer\">\n              <button type=\"button\" class=\"btn btn-secondary\" data-dismiss=\"modal\">Cancel</button>\n              <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\"\n              (click)=\"resetEditor()\">Reset</button>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </header>\n\n  <div id=\"editor\"></div><!-- This is the body -->\n  \n  <footer class=\"editor-footer\">\n      <button type=\"button\" class=\"btn btn-success pull-right\" \n      (click)=\"submit()\">Submit Solution</button>\n  </footer>\n</section>"
 
 /***/ }),
 
@@ -219,6 +219,8 @@ module.exports = "<p>\n  editor works!\n</p>\n"
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EditorComponent", function() { return EditorComponent; });
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _services_collaboration_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../services/collaboration.service */ "./src/app/services/collaboration.service.ts");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -229,20 +231,66 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
+
+
 var EditorComponent = /** @class */ (function () {
-    function EditorComponent() {
+    function EditorComponent(collaboration, route) {
+        this.collaboration = collaboration;
+        this.route = route;
+        this.languages = ['Java', 'Python'];
+        this.language = 'Java'; //default language
         this.defaultContent = {
-            'Java': "public class Example {\n                      public static void main(String[] args) {\n                        // Type your Java code here \n                    } \n       }\n       ",
-            'Python': "class Solution:\n                def example():\n                        # write your Python code here"
+            'Java': "public class Example {\n                public static void main(String[] args) {\n                   // Type your Java code here\n                }\n              }",
+            'Python': "class Solution:\n                   def example():\n                   # write your Python code here"
         }; //use `` to write multi-line text
     }
+    // ngOnInit() {
+    //    // "editor" is the id in html
+    //    this.editor = ace.edit("editor");
+    //    this.editor.setTheme("ace/theme/eclipse");
+    //    this.resetEditor();
+    //    this.collaboration.init();
+    // }
     EditorComponent.prototype.ngOnInit = function () {
-        // "editor" is the id in html
+        var _this = this;
+        // use problem id as session id
+        // since we subscribe the changes, every time the params changes
+        // sessionId will be updated and the editor will be initilized
+        this.route.params.subscribe(function (params) {
+            _this.sessionId = params['id'];
+            _this.initEditor();
+        });
+    };
+    EditorComponent.prototype.initEditor = function () {
+        var _this = this;
         this.editor = ace.edit("editor");
         this.editor.setTheme("ace/theme/eclipse");
-        this.editor.getSession().setMode("ace/mode/java");
-        // set the java
-        this.editor.setValue(this.defaultContent["Java"]);
+        this.resetEditor();
+        document.getElementsByTagName('textarea')[0].focus();
+        // set up collaboration socket
+        this.collaboration.init(this.editor, this.sessionId);
+        this.editor.lastAppliedChange = null;
+        // registrer change callback
+        this.editor.on('change', function (e) {
+            console.log('editor changes: ' + JSON.stringify(e));
+            // if the change is initiated from the current browser session
+            // then send to the server
+            if (_this.editor.lastAppliedChange != e) {
+                _this.collaboration.change(JSON.stringify(e));
+            }
+        });
+    };
+    EditorComponent.prototype.resetEditor = function () {
+        this.editor.getSession().setMode("ace/mode/" + this.language.toLowerCase());
+        this.editor.setValue(this.defaultContent[this.language]);
+    };
+    EditorComponent.prototype.setLanguage = function (language) {
+        this.language = language;
+        this.resetEditor();
+    };
+    EditorComponent.prototype.submit = function () {
+        var usercode = this.editor.getValue();
+        console.log(usercode);
     };
     EditorComponent = __decorate([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"])({
@@ -250,7 +298,8 @@ var EditorComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./editor.component.html */ "./src/app/components/editor/editor.component.html"),
             styles: [__webpack_require__(/*! ./editor.component.css */ "./src/app/components/editor/editor.component.css")]
         }),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [_services_collaboration_service__WEBPACK_IMPORTED_MODULE_1__["CollaborationService"],
+            _angular_router__WEBPACK_IMPORTED_MODULE_2__["ActivatedRoute"]])
     ], EditorComponent);
     return EditorComponent;
 }());
@@ -359,7 +408,7 @@ module.exports = ""
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container\" *ngIf=\"problem\">\n  <div class=\"col-sm-12 col-md-4\">\n    <div>\n      <h2>\n        {{problem.id}}. {{problem.name}}\n      </h2> \n      <p>\n        {{problem.desc}}\n      </p>\n      <div class=\"hidden-xs col-sm-12 col-md-8\">\n        <app-editor></app-editor>\n      </div>\n    </div>\n  </div>\n </div>"
+module.exports = "<div class=\"container\" *ngIf=\"problem\">\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-md-4\">\n      <div>\n        <h2>\n          {{problem.id}}. {{problem.name}}\n        </h2>\n        <p>\n          {{problem.desc}}\n        </p>\n      </div>\n    </div>\n    <div class=\"hidden-xs col-sm-12 col-md-8\">\n      <app-editor></app-editor>\n    </div>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -396,12 +445,10 @@ var ProblemDetailComponent = /** @class */ (function () {
     ProblemDetailComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.route.params.subscribe(function (params) {
+            // this.problem = this.dataService.getProblem(+params['id']); // + convert '1' to 1 
             // getProblem(id) returns a Promise
             _this.dataService.getProblem(+params['id'])
                 .then(function (problem) { return _this.problem = problem; });
-            //getProblem return a promise.
-            //problem is the returned data source. 
-            //this.problem is your local problem.
         });
     };
     ProblemDetailComponent = __decorate([
@@ -463,7 +510,7 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 var __metadata = (undefined && undefined.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
- //unsubscribe when destroy to avoid memory leak
+
 
 var ProblemListComponent = /** @class */ (function () {
     function ProblemListComponent(dataService) {
@@ -477,6 +524,7 @@ var ProblemListComponent = /** @class */ (function () {
     };
     ProblemListComponent.prototype.getProblem = function () {
         var _this = this;
+        // this.problems = this.dataService.getProblems();
         this.subscriptionProblems = this.dataService.getProblems()
             .subscribe(function (problems) { return _this.problems = problems; });
     };
@@ -489,6 +537,67 @@ var ProblemListComponent = /** @class */ (function () {
         __metadata("design:paramtypes", [_services_data_service__WEBPACK_IMPORTED_MODULE_1__["DataService"]])
     ], ProblemListComponent);
     return ProblemListComponent;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/services/collaboration.service.ts":
+/*!***************************************************!*\
+  !*** ./src/app/services/collaboration.service.ts ***!
+  \***************************************************/
+/*! exports provided: CollaborationService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CollaborationService", function() { return CollaborationService; });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (undefined && undefined.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var CollaborationService = /** @class */ (function () {
+    function CollaborationService() {
+    }
+    CollaborationService.prototype.init = function (editor, sessionId) {
+        // window.location.origin: the server location on the current page
+        // for example, the current page on the browser is "localhost:3000/problems/1", the window.location.origin = "http/localhost:3000"
+        //this.collaborationSocket = io(window.location.origin, { query: 'message=haha' });
+        // take two parameters
+        this.collaborationSocket = io(window.location.origin, { query: 'sessionId=' + sessionId });
+        // wait for 'message' event
+        // when receive the message, for now just print the message
+        // this.collaborationSocket.on("message", (message) => {
+        //   console.log('message received from the server: ' + message);
+        // })
+        // when receive change from the server, apply to local browser session
+        this.collaborationSocket.on('change', function (delta) {
+            console.log('collaboration: editor changes ' + delta);
+            delta = JSON.parse(delta);
+            editor.lastAppliedChange = delta;
+            editor.getSession().getDocument().applyDeltas([delta]);
+        });
+    };
+    // send to server (which will forward to other participants)
+    CollaborationService.prototype.change = function (delta) {
+        console.log('send message' + delta);
+        this.collaborationSocket.emit('change', delta);
+    };
+    CollaborationService = __decorate([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_0__["Injectable"])({
+            providedIn: 'root'
+        }),
+        __metadata("design:paramtypes", [])
+    ], CollaborationService);
+    return CollaborationService;
 }());
 
 
@@ -525,9 +634,19 @@ var __metadata = (undefined && undefined.__metadata) || function (k, v) {
 var DataService = /** @class */ (function () {
     function DataService(httpClient) {
         this.httpClient = httpClient;
-        //problems : Problem[] = PROBLEMS;
+        // problems : Problem[] = PROBLEMS;
         this._problemSource = new rxjs__WEBPACK_IMPORTED_MODULE_2__["BehaviorSubject"]([]);
     }
+    // getProblems() : Problem[] {
+    // 	return this.problems;
+    // }
+    // getProblem(id : number) : Problem {
+    // 	return this.problems.find( (problem) => problem.id === id);
+    // }
+    // addProblem(problem: Problem) {
+    // 	problem.id = this.problems.length + 1;
+    // 	this.problems.push(problem);
+    // }
     DataService.prototype.getProblems = function () {
         var _this = this;
         this.httpClient.get('api/v1/problems')
@@ -551,8 +670,6 @@ var DataService = /** @class */ (function () {
         return this.httpClient.post('api/v1/problems', problem, options)
             .toPromise()
             .then(function (res) {
-            // any: type, don't care the type
-            // update the _problemSource
             _this.getProblems();
             return res;
         })

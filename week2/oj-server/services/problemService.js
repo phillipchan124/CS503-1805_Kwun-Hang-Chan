@@ -21,8 +21,7 @@
 //   	"id":4,
 //     "name":"Triangle Count",
 //     "desc":"Given an array of integers, how many three numbers can be found in the array, so that we can build an triangle whose three edges length is the three numbers that we find?",
-//     "difficulty":"hard"
-//   },
+//     "difficulty":"hard"},
 //   {
 //     "id":5,
 //     "name":"Sliding Window Maximum", 
@@ -38,67 +37,64 @@ const getProblems = function() {
   // return new Promise((resolve, reject) => {
   //   resolve(problems);
   // });
-  return new Promise((resolve, reject) => {
-        problemModel.find({}, (err, problems) => {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(problems);
-            }
-        });
-      });
+
+    return new Promise((resolve, reject) => {
+    	problemModel.find({}, (err, problems) => {
+    		if (err) {
+    			reject(err);
+    		} else {
+    			resolve(problems);
+    		}
+    	})
+  });
 }
 
 // get problem by ID
 const getProblem = function(id) {
-  // return new Promise((resolve, reject) => {
-  //   // find problem whose id matches input id
-  //   resolve(problems.find(problem => problem.id === id))
-  // });
-  return new Promise((resolve, reject) => {
-        problemModel.find({id: id}, (err, problem) => {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(problem);
-            }
-        });
-      });
+    // // find problem whose id matches input id
+    // resolve(problems.find(problem => problem.id === id))
+    return new Promise((resolve, reject) => {
+    	problemModel.findOne({id: id}, (err, problem) => {
+    		if (err) {
+    			reject(err);
+    		} else {
+    			resolve(problem);
+    		}
+    	})
+  });
 }
 
 // add problem
 const addProblem = function(newProblem) {
-  // check if the problem exists
-  // return new Promise((resolve, reject) => {
-  //     if (problems.find(problem => problem.name === newProblem.name)) {
-  //           reject('Problem already exists');
-  //     } else {
-  //           // assign id to new problems
-  //           newProblem.id = problems.length + 1;
-  //           // add new problem to problem list
-  //           problems.push(newProblem);
-  //           // return new problem
-  //           resolve(newProblem);
-  //     }});
-  return new Promise((resolve, reject) => {
+//   // check if the problem exists
+//   return new Promise((resolve, reject) => {
+//     if(problems.find(problem => problem.name === newProblem.name)) {
+//       reject('Problem already exists');
+//     } else {
+//       // assign id to new problems
+//       newProblem.id = problems.length + 1;
+//       // add new problem to problem list
+//       problems.push(newProblem);
+//       // return new problem
+//       resolve(newProblem);
+// } });
+	return new Promise((resolve, reject) => {
       // check if the problem is already in the db
-      problemModel.findOne({name: newProblem.name}, function(err, data){
-          if(data) {
-             // if we find data, the problem exists
-             reject("Problem already exists")
-          } else {
-            // save the problem to mongodb
-            // count: get the number of problems already in db 
-             problemModel.count({}, (err, count) => {
+      problemModel.findOne({name: newProblem.name}, function(err, data) {
+            if (data) {
+              	// if we find data, the problem exists
+                reject("Problem already exists")
+            } else {
+            	problemModel.count({}, (err, count) => {
                     newProblem.id = count + 1;
                     // create mongodb object
                     const mongoProblem = new problemModel(newProblem);
                     mongoProblem.save();
                     resolve(mongoProblem);
-             });
-          }
+                });
+            }
       });
-});
+  	});
 }
 
 module.exports = {
