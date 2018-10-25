@@ -8,7 +8,7 @@ from docker.errors import ContainerError
 from docker.errors import ImageNotFound
 
 CURRENT_DIR = os.path.dirname(__file__)
-IMAGE_NAME = 'phillip/cs503'
+IMAGE_NAME = 'phillipkhchan/cs503'
 
 client = docker.from_env()
 
