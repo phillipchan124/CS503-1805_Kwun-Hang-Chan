@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CollaborationService } from '../../services/collaboration.service';
 import { ActivatedRoute, Params } from '@angular/router';
 
+import { DataService } from '../../services/data.service';
+
 declare var ace: any;
 
 @Component({
@@ -14,8 +16,10 @@ export class EditorComponent implements OnInit {
 	editor: any;
   sessionId: string;
 
-  public languages: string[]  = ['Java', 'Python'];
+  public languages: string[]  = ['Java', 'Python', 'C++'];
   language: string = 'Java'; //default language
+  output: string = '';
+  users: string = '';
 
 	defaultContent = {
 	   'Java': `public class Example {
@@ -25,11 +29,16 @@ export class EditorComponent implements OnInit {
               }`,
      'Python': `class Solution:
                    def example():
-                   # write your Python code here`
+                   # write your Python code here`,
+     'C++"': `int main()
+              {
+                    return 0;
+              }`
  };//use `` to write multi-line text
  
  constructor(private collaboration: CollaborationService,
-             private route: ActivatedRoute) {}
+             private route: ActivatedRoute,
+             private dataService: DataService) {}
 
  // ngOnInit() {
  //    // "editor" is the id in html
@@ -85,5 +94,10 @@ export class EditorComponent implements OnInit {
  submit(): void {
     let usercode = this.editor.getValue();
     console.log(usercode);
+    const data = {
+      code: usercode,
+      lang: this.language.toLowerCase()
+    }
+    this.dataService.buildAndRun(data).then(res => this.output = res);
  }
 }
