@@ -19,6 +19,7 @@ export class DataService {
   }
 
   addProblem(problem: Problem) {
-  	
+  	problem.id = this.problems.length + 1;
+  	this.problems.push(problem);
   }
 }
